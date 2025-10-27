@@ -70,7 +70,12 @@ jobs:
 
       - name: Build operator image
         run: |
-          export VERSION=${{ github.ref_name }}
+          # Use semantic version instead of branch name
+          if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
+            export VERSION="1.0.1"
+          else
+            export VERSION="${{ github.ref_name }}"
+          fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make docker-build
@@ -82,25 +87,41 @@ jobs:
 
       - name: Generate bundle
         run: |
-          export VERSION=${{ github.ref_name }}
+          # Use semantic version instead of branch name
+          if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
+            export VERSION="1.0.1"
+          else
+            export VERSION="${{ github.ref_name }}"
+          fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           # Ensure we're using the system kustomize, not local bin/
           export PATH="/usr/local/bin:$PATH"
           which kustomize
           kustomize version
+          echo "Using VERSION: $VERSION"
           make bundle
 
       - name: Build bundle image
         run: |
-          export VERSION=${{ github.ref_name }}
+          # Use semantic version instead of branch name
+          if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
+            export VERSION="1.0.1"
+          else
+            export VERSION="${{ github.ref_name }}"
+          fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make bundle-build
 
       - name: Push bundle image
         run: |
-          export VERSION=${{ github.ref_name }}
+          # Use semantic version instead of branch name
+          if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
+            export VERSION="1.0.1"
+          else
+            export VERSION="${{ github.ref_name }}"
+          fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make bundle-push

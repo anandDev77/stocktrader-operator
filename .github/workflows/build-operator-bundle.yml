@@ -43,6 +43,10 @@ jobs:
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
           sudo mv kustomize /usr/local/bin/
+          # Remove the bin directory to avoid conflicts with local binaries
+          rm -rf bin/
+          # Verify kustomize is working
+          kustomize version
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -81,6 +85,10 @@ jobs:
           export VERSION=${{ github.ref_name }}
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
+          # Ensure we're using the system kustomize, not local bin/
+          export PATH="/usr/local/bin:$PATH"
+          which kustomize
+          kustomize version
           make bundle
 
       - name: Build bundle image

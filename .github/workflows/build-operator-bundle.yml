@@ -1,0 +1,118 @@
+name: Build and Push Operator Bundle to GHCR
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - '**'
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/stocktrader-operator-bundle
+  OPERATOR_IMAGE_NAME: ${{ github.repository_owner }}/stocktrader-operator
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install operator-sdk
+        run: |
+          curl -L https://github.com/operator-framework/operator-sdk/releases/download/v1.35.0/operator-sdk_linux_amd64 -o operator-sdk
+          chmod +x operator-sdk
+          sudo mv operator-sdk /usr/local/bin/
+
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+            type=sha,format=short
+            type=raw,value=latest
+
+      - name: Build operator image
+        run: |
+          export VERSION=${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
+          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          make docker-build
+
+      - name: Push operator image
+        run: |
+          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          make docker-push
+
+      - name: Generate bundle
+        run: |
+          export VERSION=${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
+          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          make bundle
+
+      - name: Build bundle image
+        run: |
+          export VERSION=${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
+          export BUNDLE_IMG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          make bundle-build
+
+      - name: Push bundle image
+        run: |
+          export VERSION=${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
+          export BUNDLE_IMG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          make bundle-push
+
+      - name: Output image information
+        run: |
+          echo "Operator Image: ${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}"
+          echo "Bundle Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+          echo "Bundle Image Latest: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          
+          # Create a summary for the workflow
+          echo "## 🚀 Operator Bundle Built Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Images Created:" >> $GITHUB_STEP_SUMMARY
+          echo "- **Operator Image**: \`${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle Image (Latest)**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Usage in Terraform:" >> $GITHUB_STEP_SUMMARY
+          echo "Update your \`azure/modules/k8s_bootstrap/main.tf\` file:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`hcl" >> $GITHUB_STEP_SUMMARY
+          echo "operator-sdk run bundle ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }} --timeout=600s" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

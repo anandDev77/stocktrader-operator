@@ -67,52 +67,55 @@ jobs:
       - name: Build operator image
         run: |
           export VERSION=${{ github.ref_name }}
-          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
-          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make docker-build
 
       - name: Push operator image
         run: |
-          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make docker-push
 
       - name: Generate bundle
         run: |
           export VERSION=${{ github.ref_name }}
-          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
-          export IMG=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make bundle
 
       - name: Build bundle image
         run: |
           export VERSION=${{ github.ref_name }}
-          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
-          export BUNDLE_IMG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make bundle-build
 
       - name: Push bundle image
         run: |
           export VERSION=${{ github.ref_name }}
-          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}
-          export BUNDLE_IMG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):${{ github.ref_name }}
           make bundle-push
 
       - name: Output image information
         run: |
-          echo "Operator Image: ${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}"
-          echo "Bundle Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
-          echo "Bundle Image Latest: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          OPERATOR_IMAGE_LOWER=$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          BUNDLE_IMAGE_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          
+          echo "Operator Image: ${{ env.REGISTRY }}/$OPERATOR_IMAGE_LOWER:${{ github.ref_name }}"
+          echo "Bundle Image: ${{ env.REGISTRY }}/$BUNDLE_IMAGE_LOWER:${{ github.ref_name }}"
+          echo "Bundle Image Latest: ${{ env.REGISTRY }}/$BUNDLE_IMAGE_LOWER:latest"
           
           # Create a summary for the workflow
           echo "## 🚀 Operator Bundle Built Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Images Created:" >> $GITHUB_STEP_SUMMARY
-          echo "- **Operator Image**: \`${{ env.REGISTRY }}/${{ env.OPERATOR_IMAGE_NAME }}:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Bundle Image**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Bundle Image (Latest)**: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Operator Image**: \`${{ env.REGISTRY }}/$OPERATOR_IMAGE_LOWER:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle Image**: \`${{ env.REGISTRY }}/$BUNDLE_IMAGE_LOWER:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Bundle Image (Latest)**: \`${{ env.REGISTRY }}/$BUNDLE_IMAGE_LOWER:latest\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Usage in Terraform:" >> $GITHUB_STEP_SUMMARY
           echo "Update your \`azure/modules/k8s_bootstrap/main.tf\` file:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`hcl" >> $GITHUB_STEP_SUMMARY
-          echo "operator-sdk run bundle ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }} --timeout=600s" >> $GITHUB_STEP_SUMMARY
+          echo "operator-sdk run bundle ${{ env.REGISTRY }}/$BUNDLE_IMAGE_LOWER:${{ github.ref_name }} --timeout=600s" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

@@ -66,3 +66,6 @@ The following page should pop up:
 Congratulations, you have used the operator to install and configure and access the Stock Trader application!
 
 
+
+
+

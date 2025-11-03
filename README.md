@@ -64,8 +64,3 @@ In a browser, enter the url in this format: `https://<trader-service-ip>:9443/tr
 The following page should pop up:
 ![Login](images/Login.png)
 Congratulations, you have used the operator to install and configure and access the Stock Trader application!
-
-
-
-
-

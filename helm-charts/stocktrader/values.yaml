@@ -123,6 +123,11 @@ sentiment:
     repository: <your-repo>/stock-sentiment-api
     tag: latest
   url: http://{{ .Release.Name }}-sentiment-api-service:8000
+  dashboard:
+    enabled: false
+    image:
+      repository: <your-repo>/stock-sentiment-dashboard
+      tag: latest
   dashboardUrl: http://{{ .Release.Name }}-sentiment-dashboard-service:8501
 trader:
   enabled: true

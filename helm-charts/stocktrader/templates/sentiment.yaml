@@ -248,4 +248,89 @@ spec:
   selector:
     app: sentiment-api
 {{- end }}
+---
+{{- if and .Values.sentiment.enabled .Values.sentiment.dashboard.enabled }}
+#Deploy the dashboard pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sentiment-dashboard
+  labels:
+    app: {{ .Release.Name }}-stock-trader
+  annotations:
+    prism.subkind: Streamlit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: sentiment-dashboard
+  template:
+    metadata:
+      labels:
+        app: sentiment-dashboard
+      annotations:
+        git-repo: "https://github.com/IBMStockTrader/stock-sentiment-analysis"
+    spec:
+{{- if .Values.global.pullSecret }}
+      imagePullSecrets:
+      - name: {{ tpl .Values.global.pullSecretName . }}
+{{- end }}
+      containers:
+      - name: sentiment-dashboard
+        image: "{{ .Values.sentiment.dashboard.image.repository }}:{{ .Values.sentiment.dashboard.image.tag }}"
+        env:
+          # API URL for dashboard to connect to sentiment API
+          - name: SENTIMENT_API_URL
+            value: {{ tpl .Values.sentiment.url . }}
+        ports:
+          - containerPort: 8501
+        imagePullPolicy: Always
+{{- if .Values.global.healthCheck }}
+        startupProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /_stcore/health
+            port: 8501
+          periodSeconds: 15
+          failureThreshold: 3
+{{- end }}
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+            ephemeral-storage: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 64Mi
+---
+#Deploy the dashboard service (LoadBalancer for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-sentiment-dashboard-service
+  labels:
+    app: sentiment-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8501
+      targetPort: 8501
+  selector:
+    app: sentiment-dashboard
+{{- end }}
 

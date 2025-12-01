@@ -73,7 +73,7 @@ jobs:
           if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
             export VERSION="1.0.1"
           else
-            export VERSION="0.0.0-sentimentAnalysis"
+            export VERSION="0.0.0-sentimentanalysis"
           fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):sentimentAnalysis
@@ -90,7 +90,7 @@ jobs:
           if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
             export VERSION="1.0.1"
           else
-            export VERSION="0.0.0-sentimentAnalysis"
+            export VERSION="0.0.0-sentimentanalysis"
           fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export IMG=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):sentimentAnalysis
@@ -107,7 +107,7 @@ jobs:
           if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
             export VERSION="1.0.1"
           else
-            export VERSION="0.0.0-sentimentAnalysis"
+            export VERSION="0.0.0-sentimentanalysis"
           fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):sentimentAnalysis
@@ -119,7 +119,7 @@ jobs:
           if [[ "${{ github.ref_name }}" == "master" || "${{ github.ref_name }}" == "main" ]]; then
             export VERSION="1.0.1"
           else
-            export VERSION="0.0.0-sentimentAnalysis"
+            export VERSION="0.0.0-sentimentanalysis"
           fi
           export IMAGE_TAG_BASE=${{ env.REGISTRY }}/$(echo "${{ env.OPERATOR_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           export BUNDLE_IMG=${{ env.REGISTRY }}/$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):sentimentAnalysis

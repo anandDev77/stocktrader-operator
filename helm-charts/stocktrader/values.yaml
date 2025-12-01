@@ -113,6 +113,17 @@ stockQuote:
     class: noneEncryptor
     saltBytes: <salt bytes generated>
     password: <encryption password>
+sentiment:
+  enabled: false
+  replicas: 1
+  autoscale: false
+  maxReplicas: 10
+  cpuThreshold: 75
+  image:
+    repository: <your-repo>/stock-sentiment-api
+    tag: latest
+  url: http://{{ .Release.Name }}-sentiment-api-service:8000
+  dashboardUrl: http://{{ .Release.Name }}-sentiment-dashboard-service:8501
 trader:
   enabled: true
   replicas: 1

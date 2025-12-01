@@ -1,0 +1,209 @@
+#       Copyright 2017-2021 IBM Corp, All Rights Reserved
+#       Copyright 2022-2025 Kyndryl, All Rights Reserved
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+{{- if .Values.sentiment.enabled }}
+#Deploy the pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sentiment-api
+  labels:
+    app: {{ .Release.Name }}-stock-trader
+  annotations:
+    prism.subkind: FastAPI
+spec:
+{{- if not .Values.sentiment.autoscale }}
+  replicas: {{ .Values.sentiment.replicas }}
+{{- end }}
+  selector:
+    matchLabels:
+        app: sentiment-api
+  template:
+    metadata:
+      labels:
+        app: sentiment-api
+      annotations:
+        git-repo: "https://github.com/IBMStockTrader/stock-sentiment-analysis"
+{{- if .Values.global.monitoring }}
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: "8000"
+{{- end }}
+{{- if .Values.global.istio }}
+        sidecar.istio.io/inject: 'true'
+{{- end }}
+    spec:
+{{- if .Values.global.pullSecret }}
+      imagePullSecrets:
+      - name: {{ tpl .Values.global.pullSecretName . }}
+{{- end }}
+      containers:
+      - name: sentiment-api
+        image: "{{ .Values.sentiment.image.repository }}:{{ .Values.sentiment.image.tag }}"
+        env:
+          - name: AZURE_OPENAI_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.openai.endpoint
+                optional: true
+          - name: AZURE_OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.openai.apiKey
+                optional: true
+          - name: AZURE_OPENAI_DEPLOYMENT_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.openai.deploymentName
+                optional: true
+          - name: AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.openai.embeddingDeployment
+                optional: true
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: redis.host
+                optional: true
+          - name: REDIS_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: redis.port
+                optional: true
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: redis.password
+                optional: true
+          - name: AZURE_AI_SEARCH_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.aiSearch.endpoint
+                optional: true
+          - name: AZURE_AI_SEARCH_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.aiSearch.apiKey
+                optional: true
+          - name: AZURE_AI_SEARCH_INDEX_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.aiSearch.indexName
+                optional: true
+        ports:
+          - containerPort: 8000
+        imagePullPolicy: Always
+{{- if .Values.global.healthCheck }}
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          periodSeconds: 15
+          failureThreshold: 3
+{{- end }}
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+            ephemeral-storage: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 64Mi
+{{- if .Values.sentiment.autoscale }}
+---
+#Deploy the autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-sentiment-api-hpa
+  labels:
+    app: stock-trader
+spec:
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      selectPolicy: Min
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      selectPolicy: Max
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 120
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-sentiment-api
+  minReplicas: {{ .Values.sentiment.replicas }}
+  maxReplicas: {{ .Values.sentiment.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.sentiment.cpuThreshold }}
+{{- end }}
+---
+#Deploy the service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-sentiment-api-service
+  labels:
+    app: sentiment-api
+{{- if .Values.global.monitoring }}
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: "8000"
+{{- end }}
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: sentiment-api
+{{- end }}
+

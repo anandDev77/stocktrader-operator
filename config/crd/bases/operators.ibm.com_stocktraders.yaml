@@ -964,6 +964,47 @@ spec:
                     description: Stock Quote URL
                     type: string
                 type: object
+              sentiment:
+                description: Sentiment Analysis microservice
+                properties:
+                  enabled:
+                    description: Enable the Sentiment Analysis microservice
+                    type: boolean
+                  autoscale:
+                    description: Enable a HorizontalPodAutoscaler for this microservice
+                    type: boolean
+                  cpuThreshold:
+                    description: CPU Threshold for autoscaling
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  image:
+                    description: Docker image settings
+                    properties:
+                      repository:
+                        description: Docker image registry
+                        type: string
+                      tag:
+                        description: Docker image tag
+                        type: string
+                    type: object
+                  maxReplicas:
+                    description: Maximum number of pods for this microservice
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  replicas:
+                    description: Initial number of pods for this microservice
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  url:
+                    description: Sentiment API URL
+                    type: string
+                  dashboardUrl:
+                    description: Sentiment Dashboard URL (Streamlit)
+                    type: string
+                type: object
               tradeHistory:
                 description: Trade History microservice (optional - requires kafka and mongo)
                 properties:

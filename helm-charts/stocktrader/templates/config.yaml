@@ -24,6 +24,9 @@ data:
   broker.url: {{ tpl .Values.broker.url . }}
   portfolio.url: {{ tpl .Values.portfolio.url . }}
   stockQuote.url: {{ tpl .Values.stockQuote.url . }}
+  sentiment.url: {{ tpl .Values.sentiment.url . }}
+  sentiment.enabled: {{ quote .Values.sentiment.enabled }}
+  sentiment.dashboardUrl: {{ tpl .Values.sentiment.dashboardUrl . }}
   watson.url: {{ .Values.watson.url }}
   tradeHistory.url: {{ tpl .Values.tradeHistory.url . }}
   trader.whiteLabelHeaderImage: {{ .Values.trader.whiteLabelHeaderImage }}

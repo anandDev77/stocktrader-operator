@@ -92,6 +92,10 @@ data:
   s3.location: {{ .Values.s3.location }}
   s3.endpointUrl: {{ .Values.s3.endpointUrl }}
   s3.resourceInstanceId: "{{ .Values.s3.resourceInstanceId }}"
+  rag.topK: "{{ .Values.rag.topK }}"
+  dataSource.reddit.enabled: {{ quote .Values.dataSources.reddit.enabled }}
+  dataSource.alphaVantage.enabled: {{ quote .Values.dataSources.alphaVantage.enabled }}
+  dataSource.finnhub.enabled: {{ quote .Values.dataSources.finnhub.enabled }}
   ssl.certs: |-
 {{ .Values.global.certs | indent 4 }}
 {{- end }}

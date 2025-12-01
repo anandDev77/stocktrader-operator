@@ -70,6 +70,12 @@ spec:
                 name: {{ tpl .Values.global.secretName . }}
                 key: azure.openai.deploymentName
                 optional: true
+          - name: AZURE_OPENAI_API_VERSION
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: azure.openai.apiVersion
+                optional: true
           - name: AZURE_OPENAI_EMBEDDING_DEPLOYMENT
             valueFrom:
               secretKeyRef:
@@ -111,6 +117,54 @@ spec:
               secretKeyRef:
                 name: {{ tpl .Values.global.secretName . }}
                 key: azure.aiSearch.indexName
+                optional: true
+          - name: APP_RAG_TOP_K
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: rag.topK
+                optional: true
+          - name: DATA_SOURCE_REDDIT_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: dataSource.reddit.clientId
+                optional: true
+          - name: DATA_SOURCE_REDDIT_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: dataSource.reddit.clientSecret
+                optional: true
+          - name: DATA_SOURCE_REDDIT_ENABLED
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: dataSource.reddit.enabled
+                optional: true
+          - name: DATA_SOURCE_ALPHA_VANTAGE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: dataSource.alphaVantage.apiKey
+                optional: true
+          - name: DATA_SOURCE_ALPHA_VANTAGE_ENABLED
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: dataSource.alphaVantage.enabled
+                optional: true
+          - name: DATA_SOURCE_FINNHUB_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ tpl .Values.global.secretName . }}
+                key: dataSource.finnhub.apiKey
+                optional: true
+          - name: DATA_SOURCE_FINNHUB_ENABLED
+            valueFrom:
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
+                key: dataSource.finnhub.enabled
                 optional: true
         ports:
           - containerPort: 8000

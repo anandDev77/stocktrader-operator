@@ -54,8 +54,8 @@ spec:
         env:
           - name: AZURE_OPENAI_ENDPOINT
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.openai.endpoint
                 optional: true
           - name: AZURE_OPENAI_API_KEY
@@ -66,44 +66,32 @@ spec:
                 optional: true
           - name: AZURE_OPENAI_DEPLOYMENT_NAME
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.openai.deploymentName
                 optional: true
           - name: AZURE_OPENAI_API_VERSION
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.openai.apiVersion
                 optional: true
           - name: AZURE_OPENAI_EMBEDDING_DEPLOYMENT
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.openai.embeddingDeployment
                 optional: true
-          - name: REDIS_HOST
-            valueFrom:
-              configMapKeyRef:
-                name: {{ tpl .Values.global.configMapName . }}
-                key: redis.host
-                optional: true
-          - name: REDIS_PORT
-            valueFrom:
-              configMapKeyRef:
-                name: {{ tpl .Values.global.configMapName . }}
-                key: redis.port
-                optional: true
-          - name: REDIS_PASSWORD
+          - name: REDIS_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
                 name: {{ tpl .Values.global.secretName . }}
-                key: redis.password
+                key: redis.url
                 optional: true
           - name: AZURE_AI_SEARCH_ENDPOINT
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.aiSearch.endpoint
                 optional: true
           - name: AZURE_AI_SEARCH_API_KEY
@@ -114,8 +102,8 @@ spec:
                 optional: true
           - name: AZURE_AI_SEARCH_INDEX_NAME
             valueFrom:
-              secretKeyRef:
-                name: {{ tpl .Values.global.secretName . }}
+              configMapKeyRef:
+                name: {{ tpl .Values.global.configMapName . }}
                 key: azure.aiSearch.indexName
                 optional: true
           - name: APP_RAG_TOP_K

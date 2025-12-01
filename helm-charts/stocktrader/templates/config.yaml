@@ -83,6 +83,12 @@ data:
   jwt.issuer: {{ .Values.jwt.issuer }}
   jwt.audience: {{ .Values.jwt.audience }}
   redis.cacheInterval: "{{ .Values.redis.cacheInterval }}"
+  azure.openai.endpoint: {{ .Values.azureOpenAI.endpoint }}
+  azure.openai.deploymentName: {{ .Values.azureOpenAI.deploymentName }}
+  azure.openai.apiVersion: {{ .Values.azureOpenAI.apiVersion }}
+  azure.openai.embeddingDeployment: {{ .Values.azureOpenAI.embeddingDeployment }}
+  azure.aiSearch.endpoint: {{ .Values.azureAISearch.endpoint }}
+  azure.aiSearch.indexName: {{ .Values.azureAISearch.indexName }}
   mongo.ip: {{ .Values.mongo.ip }}
   mongo.port: "{{ .Values.mongo.port }}"
   mongo.database: {{ .Values.mongo.database }}

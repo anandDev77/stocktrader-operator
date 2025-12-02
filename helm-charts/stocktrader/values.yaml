@@ -128,7 +128,7 @@ sentiment:
     image:
       repository: <your-repo>/stock-sentiment-dashboard
       tag: latest
-  dashboardUrl: http://{{ .Release.Name }}-sentiment-dashboard-service:8501
+  dashboardUrl: /sentiment-dashboard
 trader:
   enabled: true
   replicas: 1

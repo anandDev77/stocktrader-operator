@@ -270,6 +270,10 @@ spec:
         app: sentiment-dashboard
       annotations:
         git-repo: "https://github.com/IBMStockTrader/stock-sentiment-analysis"
+{{- if .Values.global.istio }}
+        sidecar.istio.io/inject: 'true'
+        maistra.io/expose-route: 'true'
+{{- end }}
     spec:
 {{- if .Values.global.pullSecret }}
       imagePullSecrets:
@@ -316,7 +320,7 @@ spec:
             memory: 512Mi
             ephemeral-storage: 64Mi
 ---
-#Deploy the dashboard service (LoadBalancer for external access)
+#Deploy the dashboard service (ClusterIP for Istio routing)
 apiVersion: v1
 kind: Service
 metadata:
@@ -324,7 +328,7 @@ metadata:
   labels:
     app: sentiment-dashboard
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - name: http
       protocol: TCP

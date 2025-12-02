@@ -292,20 +292,20 @@ spec:
 {{- if .Values.global.healthCheck }}
         startupProbe:
           httpGet:
-            path: /_stcore/health
+            path: /sentiment-dashboard/_stcore/health
             port: 8501
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /_stcore/health
+            path: /sentiment-dashboard/_stcore/health
             port: 8501
           periodSeconds: 10
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /_stcore/health
+            path: /sentiment-dashboard/_stcore/health
             port: 8501
           periodSeconds: 15
           failureThreshold: 3

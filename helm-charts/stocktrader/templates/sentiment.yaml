@@ -170,15 +170,15 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          periodSeconds: 15
-          timeoutSeconds: 10
-          failureThreshold: 3
+          periodSeconds: 30
+          timeoutSeconds: 20
+          failureThreshold: 5
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
-          periodSeconds: 30
-          timeoutSeconds: 15
+          periodSeconds: 60
+          timeoutSeconds: 30
           failureThreshold: 5
 {{- end }}
         resources:
